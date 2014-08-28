@@ -1,0 +1,11 @@
+name             'dsc-test-bootstrap'
+maintainer       'Jay Mundrawala'
+maintainer_email 'jdm@getchef.com'
+license          'All rights reserved'
+description      'Installs/Configures dsc-test-bootstrap'
+long_description 'Installs/Configures dsc-test-bootstrap'
+version          '0.1.0'
+
+depends 'powershell', '~> 3.0.7'
+depends 'chocolatey', '~> 0.1.0'
+depends 'windows', '~> 1.34.2'
