@@ -1,17 +1,19 @@
 include_recipe 'powershell'
 include_recipe 'chocolatey'
 
-
-powershell_script "install git" do
-  code <<-EOH
-cinst git
-  EOH
-  action :run
-end
+# -- This is really hacky...is there a better way? --
+chocolatey "git"
 
 windows_path 'C:\Program Files (x86)\Git\cmd' do
   action :add
 end
+
+ruby_block "reset ENV['PATH']" do
+  block do
+    ENV['PATH'] = "C:\\Program Files (x86)\\Git\\cmd;#{ENV['PATH']}"
+  end
+end
+# ---------------------------------------------------
 
 chef_gem "bundler"
 
