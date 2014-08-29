@@ -8,6 +8,13 @@ Param(
     [switch]$ClientRunOnly
 )
 
+if (Test-Path -Path .\berks-cookbooks) {
+    rm -Recurse -Force .\berks-cookbooks
+}
+
+berks vendor
+knife cookbook upload -a --cookbook-path .\berks-cookbooks\
+
 if ($ClientRunOnly.IsPresent) {
     knife winrm "name:$NodeName" "chef-client" -a cloud.public_fqdn
 } else {
