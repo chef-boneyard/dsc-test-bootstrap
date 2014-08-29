@@ -1,10 +1,17 @@
 # dsc-test-bootstrap-cookbook
 
-TODO: Enter the cookbook description here.
+The purpose of this cookbook is to bootstrap up machines
+to test the DSC script resource
+
+This cookbook installs powershell/git and pulls down
+a version of chef specified by attributes. It then
+uses that version of chef to run a recipe in local mode (Local mode is run
+with a different lock file)
+
 
 ## Supported Platforms
 
-TODO: List your supported platforms.
+Windows 2012
 
 ## Attributes
 
@@ -13,30 +20,94 @@ TODO: List your supported platforms.
     <th>Key</th>
     <th>Type</th>
     <th>Description</th>
-    <th>Default</th>
   </tr>
   <tr>
-    <td><tt>['dsc-test-bootstrap']['bacon']</tt></td>
-    <td>Boolean</td>
-    <td>whether to include bacon</td>
-    <td><tt>true</tt></td>
+    <td><tt>['dsc-test-bootstrap']['github_owner']</tt></td>
+    <td>String</td>
+    <td>The owner of the github repository for chef</td>
+  </tr>
+  <tr>
+    <td><tt>['dsc-test-bootstrap']['github_repo']</tt></td>
+    <td>String</td>
+    <td>The github repo containing chef</td>
+  </tr>
+  <tr>
+    <td><tt>['dsc-test-bootstrap']['git_revision']</tt></td>
+    <td>String</td>
+    <td>The git revision to checkout</td>
   </tr>
 </table>
 
 ## Usage
+### Requirements
+You will need to have knife, knife-azure, and knife-windows.
+At the time of writing this(knife windows latest release was 0.6.0 42c358e),
+knife-windows needed to be checked out and installed from
+https://github.com/opscode/knife-windows
+### bootstrap.ps1
 
-### dsc-test-bootstrap::default
+Provided is a script to create a node in azure and register it to your chef server.
 
-Include `dsc-test-bootstrap` in your node's `run_list`:
+Below is an example of my knife.rb
+```ruby
+current_dir = File.dirname(__FILE__)
+log_level                :info
+log_location             STDOUT
+client_key               "#{current_dir}/jdmundrawala.pem"
+validation_client_name   "mundrawala-test-validator"
+validation_key           "#{current_dir}/mundrawala-test-validator.pem"
+chef_server_url          "https://api.opscode.com/organizations/mundrawala-test"
+cache_type               'BasicFile'
+cache_options( :path => "#{ENV['HOME']}/.chef/checksums" )
 
-```json
-{
-  "run_list": [
-    "recipe[dsc-test-bootstrap::default]"
-  ]
-}
+knife[:azure_publish_settings_file] = "c:/users/Jay\ Mundrawala/myazure.publishsettings"
+knife[:azure_vm_size] = "Medium"
+knife[:azure_source_image] = "a699494373c04fc0bc8f2bb1389d6106__Windows-Server-2012-R2-201407.01-en.us-127GB.vhd"
+knife[:azure_service_location] = "West US"
+knife[:bootstrap_protocol] = "winrm"
+knife[:winrm_user] = "myuser"
+knife[:winrm_password] = "mypassword”
 ```
 
-## License and Authors
+Start by getting the cookbook dependencies:
+```
+berks install
+```
 
-Author:: YOUR_NAME (<YOUR_EMAIL>)
+Upload the cookbooks to your chef server:
+```
+berks vendor
+knife cookbook upload -a --cookbook-path .\berks-cookbooks\
+```
+
+Create a node in Azure and bootstrap it:
+```
+.\bootstrap.ps1 -NodeName mynode -PSVersion 5
+```
+Given the knife.rb file above, this command will create a server running
+windows 2012 in Azure. It will clone https://github.com/opscode/chef, and
+checkout platform/dsc-phase-1 because the defaults set in bootstrap.ps1
+```
+Param(
+    [Parameter(Mandatory=$true)]
+    [string]$NodeName,
+    [string]$GithubOwner = "opscode",
+    [string]$GithubRepo = "chef",
+    [string]$GitRevision = "platform/dsc-phase-1",
+    [string]$PSVersion = 4,
+    [switch]$ClientRunOnly
+)
+```
+Part of the bootstrap will run the version of chef client that was checked out
+from github. This will run
+```
+bundle exec chef-client -z test_recipe.rb > log
+```
+test_recipe.rb is in the files/default directory.
+
+Now say you make a change to files/default/test_recipe.rb (or anything in this
+cookbook). If you do not require a clean machine, upload your updated cookbooks
+to your chef server, and run
+```
+.\bootstrap.ps1 -NodeName mynode -ClientRunOnly
+```
