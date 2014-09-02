@@ -1,19 +1,16 @@
 include_recipe 'powershell'
 include_recipe 'chocolatey'
+include_recipe 'git'
 
-# -- This is really hacky...is there a better way? --
-chocolatey "git"
-
-windows_path 'C:\Program Files (x86)\Git\cmd' do
+windows_path 'C:\Program Files (x86)\Git\bin' do
   action :add
 end
 
 ruby_block "reset ENV['PATH']" do
   block do
-    ENV['PATH'] = "C:\\Program Files (x86)\\Git\\cmd;#{ENV['PATH']}"
+    ENV['PATH'] = "C:\\Program Files (x86)\\Git\\bin;#{ENV['PATH']}"
   end
 end
-# ---------------------------------------------------
 
 chef_gem "bundler"
 
