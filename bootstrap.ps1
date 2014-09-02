@@ -41,3 +41,6 @@ if ($ClientRunOnly.IsPresent) {
 
     knife azure server create --azure-dns-name $NodeName --run-list `'$recipes`' -j `"$attributes`"
 }
+
+
+knife winrm "name:$NodeName" "cd c:\specs & bundle exec rspec" -a cloud.public_fqdn

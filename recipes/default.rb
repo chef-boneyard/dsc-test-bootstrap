@@ -18,7 +18,6 @@ git "#{Chef::Config[:file_cache_path]}/chef-client" do
   repository "https://github.com/#{node[:dsc_test_bootstrap][:github_owner]}/#{node[:dsc_test_bootstrap][:github_repo]}"
   revision node[:dsc_test_bootstrap][:git_revision]
   action :sync
-  notifies :run, "powershell_script[test_chef]"
 end
 
 file "#{Chef::Config[:file_cache_path]}/client.rb" do
@@ -27,9 +26,20 @@ lockfile '#{Chef::Config[:file_cache_path]}/chef-client/.lockfile'
   EOF
 end
 
+
+# Copy the server specs
+remote_directory "c:\\specs"
+
+# Install spec requirements
+powershell_script "setup specs" do
+  cwd "c:\\specs"
+  code <<-EOH
+    bundle install
+  EOH
+end
+
 cookbook_file "test_recipe.rb" do
   path "#{Chef::Config[:file_cache_path]}/test_recipe.rb"
-  notifies :run, "powershell_script[test_chef]"
 end
 
 powershell_script "test_chef" do
@@ -38,7 +48,6 @@ powershell_script "test_chef" do
     bundle install
     bundle exec chef-client -z '#{Chef::Config[:file_cache_path]}/test_recipe.rb' -c '#{Chef::Config[:file_cache_path]}/client.rb' > log
   EOH
-  action :nothing
   notifies :write, "cat[log_chef_zero_run]"
 end
 
