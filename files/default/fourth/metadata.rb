@@ -1,0 +1,7 @@
+name             'fourth'
+maintainer       'Jay Mundrawala'
+maintainer_email 'jdm@getchef.com'
+license          'All rights reserved'
+description      'Runs the Fourth Coffee Website example'
+long_description 'Runs the Fourth Coffee Website example'
+version          '0.1.0'

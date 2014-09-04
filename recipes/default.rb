@@ -1,8 +1,8 @@
-include_recipe 'powershell'
+TDIR = "C:\\dsc_test_files"
+
 include_recipe 'chocolatey'
 
-# -- This is really hacky...is there a better way? --
-chocolatey "git"
+chocolatey 'git'
 
 windows_path 'C:\Program Files (x86)\Git\cmd' do
   action :add
@@ -13,40 +13,44 @@ ruby_block "reset ENV['PATH']" do
     ENV['PATH'] = "C:\\Program Files (x86)\\Git\\cmd;#{ENV['PATH']}"
   end
 end
-# ---------------------------------------------------
 
 chef_gem "bundler"
 
-git "#{Chef::Config[:file_cache_path]}/chef-client" do
+directory TDIR
+
+git "#{TDIR}/chef-client" do
   repository "https://github.com/#{node[:dsc_test_bootstrap][:github_owner]}/#{node[:dsc_test_bootstrap][:github_repo]}"
   revision node[:dsc_test_bootstrap][:git_revision]
   action :sync
-  notifies :run, "powershell_script[test_chef]"
 end
 
-file "#{Chef::Config[:file_cache_path]}/client.rb" do
+file "#{TDIR}/client.rb" do
   content <<-EOF
-lockfile '#{Chef::Config[:file_cache_path]}/chef-client/.lockfile'
+lockfile '#{TDIR}/chef-client/.lockfile'
+cookbook_path '#{TDIR}/cookbooks'
   EOF
 end
 
-cookbook_file "test_recipe.rb" do
-  path "#{Chef::Config[:file_cache_path]}/test_recipe.rb"
-  notifies :run, "powershell_script[test_chef]"
-end
+# Copy the fourth cookbook
+directory "#{TDIR}\\cookbooks"
+remote_directory "#{TDIR}\\cookbooks\\fourth"
 
-powershell_script "test_chef" do
-  cwd "#{Chef::Config[:file_cache_path]}/chef-client"
+# Copy the server specs
+remote_directory "#{TDIR}\\specs"
+
+# Install spec requirements
+powershell_script "setup specs" do
+  cwd "#{TDIR}\\specs"
   code <<-EOH
     bundle install
-    bundle exec chef-client -z '#{Chef::Config[:file_cache_path]}/test_recipe.rb' -c '#{Chef::Config[:file_cache_path]}/client.rb' > log
   EOH
-  action :nothing
-  notifies :write, "cat[log_chef_zero_run]"
 end
 
-cat "log_chef_zero_run" do
-  path "#{Chef::Config[:file_cache_path]}/chef-client/log"
-  action :nothing
+powershell_script "setup chef client for testing" do
+  cwd "#{TDIR}\\chef-client"
+  code <<-EOH
+    bundle install
+  EOH
 end
 
+#bundle exec chef-client -z '#{Chef::Config[:file_cache_path]}/test_recipe.rb' -c '#{Chef::Config[:file_cache_path]}/client.rb' > log

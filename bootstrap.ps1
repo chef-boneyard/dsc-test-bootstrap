@@ -41,3 +41,6 @@ if ($ClientRunOnly.IsPresent) {
 
     knife azure server create --azure-dns-name $NodeName --run-list `'$recipes`' -j `"$attributes`"
 }
+
+knife winrm "name:$NodeName" "cd c:\dsc_test_files\chef-client & bundle exec chef-client -z -c 'c:\dsc_test_files\client.rb' -o 'fourth' --force-formatter" -a cloud.public_fqdn
+knife winrm "name:$NodeName" "cd c:\dsc_test_files\specs & bundle exec rspec" -a cloud.public_fqdn
