@@ -1,18 +1,29 @@
 source 'https://rubygems.org'
 
-gem 'berkshelf'
+group :rake do
+  gem 'rake'
+  gem 'tomlrb'
+end
 
-# Uncomment these lines if you want to live on the Edge:
-#
-# group :development do
-#   gem "berkshelf", github: "berkshelf/berkshelf"
-#   gem "vagrant", github: "mitchellh/vagrant", tag: "v1.6.3"
-# end
-#
-# group :plugins do
-#   gem "vagrant-berkshelf", github: "berkshelf/vagrant-berkshelf"
-#   gem "vagrant-omnibus", github: "schisamo/vagrant-omnibus"
-# end
+group :lint do
+  gem 'foodcritic', '~> 5.0'
+  gem 'rubocop', '~> 0.33'
+end
 
-gem "test-kitchen"
-gem "kitchen-vagrant"
+group :unit do
+  gem 'berkshelf',  '~> 3.2'
+  gem 'chefspec',   '~> 4.3'
+end
+
+group :kitchen_common do
+  gem 'test-kitchen', '~> 1.4'
+end
+
+group :kitchen_vagrant do
+  gem 'kitchen-vagrant', '~> 0.19'
+end
+
+group :kitchen_cloud do
+  gem 'kitchen-digitalocean'
+  gem 'kitchen-ec2'
+end
