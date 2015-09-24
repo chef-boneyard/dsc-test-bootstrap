@@ -1,6 +1,7 @@
 # dsc-test-bootstrap-cookbook
 
 [![Build Status](https://travis-ci.org/chef-cookbooks/dsc-test-bootstrap.svg?branch=master)](https://travis-ci.org/chef-cookbooks/dsc-test-bootstrap)
+
 The purpose of this cookbook is to bootstrap up machines
 to test the DSC script resource
 
@@ -10,9 +11,19 @@ uses that version of chef to run a recipe in local mode (Local mode is run
 with a different lock file)
 
 
-## Supported Platforms
+## Requirements
+#### Platforms
+- Windows 2012
 
-Windows 2012
+#### Chef
+- Chef 12+
+
+#### Cookbooks
+- windows
+- powershell
+- git
+- chocolatey
+
 
 ## Attributes
 
