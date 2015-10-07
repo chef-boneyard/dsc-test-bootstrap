@@ -1,4 +1,4 @@
-TDIR = "C:\\dsc_test_files"
+TDIR = 'C:\\dsc_test_files'
 
 include_recipe 'chocolatey'
 
@@ -14,7 +14,7 @@ ruby_block "reset ENV['PATH']" do
   end
 end
 
-chef_gem "bundler"
+chef_gem 'bundler'
 
 directory TDIR
 
@@ -39,18 +39,18 @@ remote_directory "#{TDIR}\\cookbooks\\fourth"
 remote_directory "#{TDIR}\\specs"
 
 # Install spec requirements
-powershell_script "setup specs" do
+powershell_script 'setup specs' do
   cwd "#{TDIR}\\specs"
   code <<-EOH
     bundle install
   EOH
 end
 
-powershell_script "setup chef client for testing" do
+powershell_script 'setup chef client for testing' do
   cwd "#{TDIR}\\chef-client"
   code <<-EOH
     bundle install
   EOH
 end
 
-#bundle exec chef-client -z '#{Chef::Config[:file_cache_path]}/test_recipe.rb' -c '#{Chef::Config[:file_cache_path]}/client.rb' > log
+# bundle exec chef-client -z '#{Chef::Config[:file_cache_path]}/test_recipe.rb' -c '#{Chef::Config[:file_cache_path]}/client.rb' > log

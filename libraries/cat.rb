@@ -1,8 +1,8 @@
 class Chef::Resource::Cat < Chef::Resource
   identity_attr :name
-  provides :cat, :on_platforms => :all
+  provides :cat, on_platforms: :all
 
-  def initialize(name, run_context=nil)
+  def initialize(name, run_context = nil)
     super
     @resource_name = :cat
     @level = :info
@@ -12,20 +12,20 @@ class Chef::Resource::Cat < Chef::Resource
     @name = name
   end
 
-  def path(arg=nil)
+  def path(arg = nil)
     set_or_return(
       :path,
       arg,
-      :kind_of => String
+      kind_of: String
     )
   end
 
   # <Symbol> Log level, one of :debug, :info, :warn, :error or :fatal
-  def level(arg=nil)
+  def level(arg = nil)
     set_or_return(
       :level,
       arg,
-      :equal_to => [ :debug, :info, :warn, :error, :fatal ]
+      equal_to: [:debug, :info, :warn, :error, :fatal]
     )
   end
 end
@@ -41,7 +41,7 @@ class Chef::Provider::Cat < Chef::Provider
 
   def action_write
     converge_by("Sending the contents of #{@new_resource.path} to Chef::Log::#{@new_resource.level}") do
-      ::File.open(@new_resource.path, "r:UTF-16LE:UTF-8") do |f|
+      ::File.open(@new_resource.path, 'r:UTF-16LE:UTF-8') do |f|
         f.each_line do |l|
           Chef::Log.send(@new_resource.level, l)
         end
