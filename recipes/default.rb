@@ -19,8 +19,8 @@ chef_gem 'bundler'
 directory TDIR
 
 git "#{TDIR}/chef-client" do
-  repository "https://github.com/#{node[:dsc_test_bootstrap][:github_owner]}/#{node[:dsc_test_bootstrap][:github_repo]}"
-  revision node[:dsc_test_bootstrap][:git_revision]
+  repository "https://github.com/#{node['dsc_test_bootstrap']['github_owner']}/#{node['dsc_test_bootstrap']['github_repo']}"
+  revision node['dsc_test_bootstrap']['git_revision']
   action :sync
 end
 
